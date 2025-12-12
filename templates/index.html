@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Access Portal{% endblock %}
+{% block heading %}Access Portal{% endblock %}
+
+{% block content %}
+<p style="font-size: 1.1em;">Select your interface: Admin for management, Student for search.</p>
+
+<div style="display: flex; gap: 30px;">
+    <div style="flex: 1; padding: 30px; border: 2px solid #007bff; border-radius: 10px;">
+        <h3 style="color: #007bff;">👤 Admin Access</h3>
+        <form method="POST" action="{{ url_for('login') }}">
+            <input type="hidden" name="role" value="admin">
+            <label for="admin_password">Password:</label><br>
+            <input type="password" id="admin_password" name="password" required><br>
+            <button type="submit" style="background-color: #007bff;">Login as Admin</button>
+            <p style="font-size: 0.9em; color: #666;">Hint: 'admin'</p>
+        </form>
+    </div>
+
+    <div style="flex: 1; padding: 30px; border: 2px solid #28a745; border-radius: 10px;">
+        <h3 style="color: #28a745;">🎓 Student Access</h3>
+        <p>No password required for student search access.</p>
+        <form method="POST" action="{{ url_for('login') }}">
+            <input type="hidden" name="role" value="student">
+            <input type="hidden" name="password" value="">
+            <button type="submit" style="background-color: #28a745; margin-top: 25px;">Enter as Student</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

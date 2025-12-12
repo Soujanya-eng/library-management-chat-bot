@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Student Chatbot{% endblock %}
+{% block heading %}🤖 Library Assistant Chatbot{% endblock %}
+
+{% block content %}
+<style>
+    /* Specific Chatbot CSS */
+    .chat-container {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        height: 500px; /* Fixed height for chat window */
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    .chat-output {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+    }
+    .chat-input {
+        padding: 15px;
+        border-top: 1px solid #ccc;
+        display: flex;
+        background-color: white;
+    }
+    .message {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 8px;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+    .user-message {
+        align-self: flex-end;
+        background-color: #007bff;
+        color: white;
+        margin-left: auto;
+    }
+    .bot-message {
+        align-self: flex-start;
+        background-color: #e9ecef;
+        color: #343a40;
+        margin-right: auto;
+    }
+    .bot-message ul {
+        margin-top: 10px;
+        padding-left: 20px;
+    }
+</style>
+
+<div class="chat-container">
+    <div class="chat-output" id="chat-output">
+        <div class="message bot-message">
+            Hello! I am the College Library Assistant. You can ask me questions about books and subjects.
+            <br><br>
+            **Try asking:** "Do you have C++?" or "Show me books on Mathematics."
+        </div>
+    </div>
+    
+    <form id="chat-form" class="chat-input" onsubmit="sendMessage(event)">
+        <input type="text" id="user-query" placeholder="Ask about a book or subject..." required style="flex-grow: 1; margin: 0; padding: 12px;">
+        <button type="submit" style="background-color: #007bff; margin-left: 10px;">Send</button>
+    </form>
+</div>
+
+<script>
+    const chatOutput = document.getElementById('chat-output');
+    const userQueryInput = document.getElementById('user-query');
+
+    function displayMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
+        messageDiv.innerHTML = text;
+        chatOutput.appendChild(messageDiv);
+        
+        // Scroll to the bottom of the chat window
+        chatOutput.scrollTop = chatOutput.scrollHeight;
+    }
+
+    function sendMessage(event) {
+        event.preventDefault(); // Stop default form submission
+        const query = userQueryInput.value.trim();
+        if (!query) return;
+
+        // 1. Display user's message
+        displayMessage(query, 'user');
+        
+        // Clear input
+        userQueryInput.value = '';
+
+        // 2. Display 'Typing...' placeholder for the bot
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'message bot-message typing-indicator';
+        typingIndicator.innerHTML = '...';
+        chatOutput.appendChild(typingIndicator);
+        chatOutput.scrollTop = chatOutput.scrollHeight;
+
+        // 3. Send request to Flask backend
+        fetch('{{ url_for("student_chat") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ query: query })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // 4. Remove 'Typing...' indicator
+            typingIndicator.remove();
+            
+            // 5. Display bot's response
+            displayMessage(data.message, 'bot');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            typingIndicator.remove();
+            displayMessage('Sorry, an error occurred while connecting to the library database.', 'bot');
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block heading %}📚 Admin Book Management{% endblock %}
+
+{% block content %}
+<div style="border: 1px solid #ccc; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+    <h3 style="color: #4CAF50;">➕ Add New Book</h3>
+    <form method="POST" action="{{ url_for('admin_add_book') }}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+            <label>Book Name:</label>
+            <input type="text" name="name" required>
+        </div>
+        <div>
+            <label>Subject:</label>
+            <input type="text" name="subject" required>
+        </div>
+        <div>
+            <label>Price:</label>
+            <input type="number" name="price" step="0.01" required>
+        </div>
+        <div>
+            <label>Edition:</label>
+            <input type="number" name="edition" required>
+        </div>
+        <div style="grid-column: 1 / 3; text-align: center;">
+            <button type="submit" style="background-color: #4CAF50; width: 50%;">Add Book</button>
+        </div>
+    </form>
+</div>
+
+<h3>📖 Current Library Stock (Total: {{ books | length }})</h3>
+{% if books %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Subject</th>
+                <th>Price</th>
+                <th>Edition</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in books %}
+            <tr>
+                <td>{{ book.book_id }}</td>
+                <td>{{ book.name }}</td>
+                <td><td>{{ book.subject }}</td>
+                <td>${{ "{:,.2f}".format(book.price) }}</td>
+                <td>{{ book.edition }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('admin_remove_book', book_id=book.book_id) }}" onsubmit="return confirm('Are you sure you want to remove {{ book.name }}?');">
+                        <button type="submit" style="background-color: #dc3545; padding: 5px 10px;">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>The library stock is currently empty.</p>
+{% endif %}
+{% endblock %}
